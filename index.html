@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Garip Dünya - Akıllı Mod</title>
+    <title>??????</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -31,7 +31,7 @@
             font-weight: bold;
             transition: 0.3s;
         }
-        .mode-btn:hover { background: #0f0; color: #000; box-shadow: 0 0 15px #0f0; }
+        .mode-btn:hover { background: #0f0; color: #000; }
 
         #game-area {
             display: none;
@@ -68,14 +68,21 @@
             cursor: pointer;
             border-radius: 8px;
             touch-action: none;
-            /* Kayma animasyonu */
             transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
                         top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
         }
 
-        body.alarm { background-color: #900 !important; color: #fff !important; }
-        body.alarm #run-away { background-color: #fff; color: #900; transition: none; }
-        
+        /* Kalp GIF Stili */
+        #heart-gif {
+            display: none;
+            position: absolute;
+            width: 200px; /* Gif'i buradan büyütebilirsin */
+            height: auto;
+            transform: translate(-50%, -50%); /* Tam butonun ortasına gelsin */
+            z-index: 100;
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -94,8 +101,10 @@
             <div class="eye"><div class="pupil"></div></div>
             <div class="eye"><div class="pupil"></div></div>
         </div>
-        <h2 id="status-text">KAÇABİLİRSİN AMA SAKLANAMAZSIN...</h2>
+        <h2 id="status-text">YAKALAYABİLECEK MİSİN?</h2>
         <button id="run-away">TIKLA BANA!</button>
+        <!-- Kalp GIF burada (Repo'daki kalp.gif dosyasını kullanır) -->
+        <img id="heart-gif" src="kalp.gif" alt="Kalp Animasyonu">
     </div>
 
     <script>
@@ -103,6 +112,7 @@
         const gameArea = document.getElementById('game-area');
         const btn = document.getElementById('run-away');
         const statusText = document.getElementById('status-text');
+        const heartGif = document.getElementById('heart-gif');
         const pupils = document.querySelectorAll('.pupil');
         let currentMode = '';
         let isCaught = false;
@@ -129,7 +139,7 @@
         }
 
         window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
-        window.addEventListener('touchmove', (e) => handleMove(e.touches[0].clientX, e.touches[0].clientY));
+        window.addEventListener('touchstart', (e) => handleMove(e.touches[0].clientX, e.touches[0].clientY));
 
         function escape() {
             if (isCaught) return;
@@ -140,41 +150,31 @@
             btn.style.top = y + 'px';
         }
 
-        // Fare ile üzerine gelince (PC için)
-        btn.addEventListener('mouseenter', () => { 
-            if(currentMode === 'pc') escape(); 
-        });
+        btn.addEventListener('mouseenter', () => { if(currentMode === 'pc') escape(); });
+        btn.addEventListener('touchstart', (e) => { if(currentMode === 'mobile') { e.preventDefault(); escape(); } });
 
-        // Dokununca (Mobil için)
-        btn.addEventListener('touchstart', (e) => {
-            if(currentMode === 'mobile') { 
-                e.preventDefault(); 
-                escape(); 
-            }
-        });
-
-        // TIKLAYINCA (Yakalarsa)
+        // TIKLAYINCA OLACAKLAR
         btn.addEventListener('click', () => {
             isCaught = true;
-            document.body.classList.add('alarm');
-            pupils.forEach(p => p.style.transform = 'translate(0,0)');
             
-            // MODA GÖRE MESAJ DEĞİŞTİRME
-            if (currentMode === 'mobile') {
-                statusText.innerHTML = "HİLECİ!<br>PARMAĞINI BASILI TUTARAK YAKALAMAN LAZIMDI!";
-                btn.innerText = "YAKALANDIN!";
-            } else {
-                statusText.innerHTML = "VAY CANINA!<br>ÇOK HIZLISIN, SİSTEMİ ÇÖKERTTİN!";
-                btn.innerText = "HELAL OLSUN!";
-            }
-            
+            // 1. Butonun konumunu al
+            const btnLeft = btn.style.left;
+            const btnTop = btn.style.top;
+
+            // 2. Butonu ve gözleri gizle, sadece arka plan kalsın
+            btn.style.display = 'none';
+            document.querySelector('.face').style.visibility = 'hidden';
+            statusText.style.visibility = 'hidden';
+
+            // 3. GIF'i butonun olduğu yere koy ve göster
+            heartGif.style.left = btnLeft;
+            heartGif.style.top = btnTop;
+            heartGif.style.display = 'block';
+
+            // 4. 3 saniye sonra sayfayı yenile (veya gif süresine göre ayarla)
             setTimeout(() => {
-                isCaught = false;
-                document.body.classList.remove('alarm');
-                btn.innerText = "TIKLA BANA!";
-                statusText.innerText = "YENİDEN DENE!";
-                escape();
-            }, 4000);
+                location.reload(); // Sayfayı yeniler
+            }, 3000); 
         });
     </script>
 </body>
